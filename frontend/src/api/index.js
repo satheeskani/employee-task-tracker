@@ -1,4 +1,4 @@
-const BASE = '/api'
+const BASE = 'https://employee-task-tracker-qjlm.onrender.com/api'
 
 async function request(url, options = {}) {
   const res = await fetch(`${BASE}${url}`, {
@@ -13,6 +13,8 @@ async function request(url, options = {}) {
 export const employeeApi = {
   getAll: () => request('/employees'),
   create: (data) => request('/employees', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id, data) => request(`/employees/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (id) => request(`/employees/${id}`, { method: 'DELETE' }),
 }
 
 export const taskApi = {

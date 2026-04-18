@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { employeeApi } from './api'
 import EmployeeForm from './components/EmployeeForm'
+import EmployeeList from './components/EmployeeList'
 import TaskForm from './components/TaskForm'
 import TaskList from './components/TaskList'
 import ToastContainer from './components/Toast'
@@ -9,6 +10,7 @@ import { useToast } from './hooks/useToast'
 export default function App() {
   const [employees, setEmployees] = useState([])
   const [taskRefresh, setTaskRefresh] = useState(0)
+  const [deletedEmployeeId, setDeletedEmployeeId] = useState(null)
   const { toasts, addToast } = useToast()
 
   const loadEmployees = useCallback(async () => {
@@ -24,6 +26,15 @@ export default function App() {
     setEmployees(prev => [emp, ...prev])
   }
 
+  function handleEmployeeUpdated(updated) {
+    setEmployees(prev => prev.map(e => e._id === updated._id ? updated : e))
+  }
+
+  function handleEmployeeDeleted(id) {
+    setEmployees(prev => prev.filter(e => e._id !== id))
+    setDeletedEmployeeId(id)
+  }
+
   function handleTaskCreated() {
     setTaskRefresh(n => n + 1)
   }
@@ -32,7 +43,6 @@ export default function App() {
     <>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
-      {/* Dark navy header */}
       <header style={{
         background: 'var(--navy)',
         borderBottom: '1px solid var(--navy-border)',
@@ -40,7 +50,6 @@ export default function App() {
         display: 'flex', alignItems: 'center', gap: 10,
         position: 'sticky', top: 0, zIndex: 50,
       }}>
-        {/* Logo */}
         <div style={{
           width: 28, height: 28, background: 'var(--teal)',
           borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
@@ -53,11 +62,9 @@ export default function App() {
             <path d="M8 10.5h5M10.5 8v5"/>
           </svg>
         </div>
-
         <span style={{ fontSize: 14, fontWeight: 600, color: '#fff', letterSpacing: '-.01em' }}>
           Employee Task Tracker
         </span>
-
         <span style={{
           marginLeft: 'auto',
           fontSize: 11, color: '#64748b',
@@ -80,7 +87,19 @@ export default function App() {
           <TaskForm employees={employees} onCreated={handleTaskCreated} toast={addToast} />
         </div>
 
-        <TaskList employees={employees} refreshSignal={taskRefresh} toast={addToast} />
+        <EmployeeList
+          employees={employees}
+          onUpdated={handleEmployeeUpdated}
+          onDeleted={handleEmployeeDeleted}
+          toast={addToast}
+        />
+
+        <TaskList
+          employees={employees}
+          refreshSignal={taskRefresh}
+          deletedEmployeeId={deletedEmployeeId}
+          toast={addToast}
+        />
       </main>
 
       <ToastContainer toasts={toasts} />

@@ -88,12 +88,22 @@ const FILTERS = [
 
 const filterColors = { all: 'var(--text-2)', pending: '#94a3b8', 'in-progress': 'var(--warning)', completed: 'var(--teal)' }
 
-export default function TaskList({ employees, refreshSignal, toast }) {
+export default function TaskList({ employees, refreshSignal, deletedEmployeeId, toast }) {
   const [selectedId, setSelectedId] = useState('')
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(false)
   const [employeeName, setEmployeeName] = useState('')
   const [filter, setFilter] = useState('all')
+
+  // Clear task list if the currently selected employee is deleted
+  useEffect(() => {
+    if (deletedEmployeeId && deletedEmployeeId === selectedId) {
+      setSelectedId('')
+      setTasks([])
+      setEmployeeName('')
+      setFilter('all')
+    }
+  }, [deletedEmployeeId])
 
   const fetchTasks = useCallback(async (id) => {
     if (!id) return
